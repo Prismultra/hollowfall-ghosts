@@ -1,0 +1,21 @@
+{
+	"schemaVersion": 1,
+	"id": "hollowfall_ghosts",
+	"version": "${version}",
+	"name": "Hollowfall Ghosts",
+	"description": "Record yourself, replay the take as a skinned mannequin 'ghost', and act against it, so one person can film scenes with several characters. Recording/actor-playback approach inspired by McHorse's BBS mod (MIT).",
+	"authors": ["Prismultra"],
+	"contributors": ["McHorse (BBS mod, inspiration)"],
+	"contact": {},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.prismultra.ghosts.GhostsMod"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

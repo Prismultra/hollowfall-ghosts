@@ -1,0 +1,50 @@
+# Builds the mod on every push.
+# - Always pushes the build log to the `ci-log` branch (so the build can be checked without Actions access).
+# - On success on main, publishes the jar to the "latest" release for one-click download.
+name: build
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - run: chmod +x ./gradlew
+      - name: build
+        run: |
+          set -o pipefail
+          ./gradlew build --stacktrace 2>&1 | tee /tmp/build.log
+      - name: publish log
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          SHA="$(git rev-parse HEAD)"
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          git switch --orphan ci-log
+          git rm -rf --cached . -q || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp /tmp/build.log build.log || echo "no log" > build.log
+          grep -nE "error:|warning:|FAILURE|BUILD SUCCESSFUL|BUILD FAILED|What went wrong" build.log > summary.txt || true
+          printf 'commit %s\nstatus %s\n' "$SHA" "$STATUS" > status.txt
+          git add build.log summary.txt status.txt
+          git commit -qm "build log for $SHA ($STATUS)"
+          git push -qf origin ci-log
+      - name: release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls build/libs/*.jar | grep -v sources | head -1)
+          gh release delete latest -y --cleanup-tag || true
+          gh release create latest "$JAR" --title "Latest build" --notes "Built from ${GITHUB_SHA}. Drop this jar into your 26.3 Fabric mods folder."

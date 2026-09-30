@@ -114,8 +114,7 @@ public class GhostsMod implements ModInitializer {
 	static final class Recording {
 		final UUID player;
 		final Take take;
-		boolean prevSwinging;
-		int prevSwingTime;
+		Object lastSwing;
 		boolean attackThisTick;
 		ItemStack[] lastEquip;
 
@@ -132,12 +131,13 @@ public class GhostsMod implements ModInitializer {
 			}
 			int tick = take.frames.size();
 
-			boolean newSwing = p.swinging && (!prevSwinging || p.swingTime < prevSwingTime);
-			prevSwinging = p.swinging;
-			prevSwingTime = p.swingTime;
+			// 26.x keeps the current swing as an object; a new object means a new swing.
+			Object current = p.isSwinging() ? p.getCurrentSwing() : null;
+			boolean newSwing = current != null && current != lastSwing;
+			lastSwing = current;
 			int swing = 0;
 			if (newSwing) {
-				swing = p.swingingArm == InteractionHand.OFF_HAND ? 2 : 1;
+				swing = 1;
 			} else if (attackThisTick) {
 				swing = 1;
 			}
@@ -209,7 +209,7 @@ public class GhostsMod implements ModInitializer {
 					run(server, level, "data merge entity " + ghost + " {pose:\"" + Take.POSES[lastPose] + "\"}");
 				}
 				if (f.swing() != 0) {
-					g.swing(f.swing() == 2 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+					run(server, level, "swing " + ghost + (f.swing() == 2 ? " offhand" : " mainhand"));
 					if (hits && f.swing() == 1) {
 						tryHit(server, level, f);
 					}

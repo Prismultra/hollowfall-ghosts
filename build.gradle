@@ -6,10 +6,19 @@ base {
 	archivesName = "hollowfall-ghosts"
 }
 
+repositories {
+	maven {
+		name = "henkelmax"
+		url = "https://maven.maxhenkel.de/repository/public"
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Optional: Simple Voice Chat API, only for ghost voices. Not bundled.
+	compileOnly "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
 }
 
 processResources {

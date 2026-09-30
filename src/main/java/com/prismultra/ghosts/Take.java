@@ -52,6 +52,8 @@ public final class Take {
 	/** Mortal ghosts have normal health and can be killed by hits. */
 	public boolean mortal;
 	public final List<Frame> frames = new ArrayList<>();
+	/** Voice recorded with the take (saved separately as <take>.voice). */
+	public List<Voice.Frame> voice = List.of();
 	/** tick -> full equipment snapshot (only stored on the ticks it changed). */
 	public final TreeMap<Integer, ItemStack[]> equipment = new TreeMap<>();
 

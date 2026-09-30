@@ -10,12 +10,16 @@
 	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["com.prismultra.ghosts.GhostsMod"]
+		"main": ["com.prismultra.ghosts.GhostsMod"],
+		"voicechat": ["com.prismultra.ghosts.voice.VoicePlugin"]
 	},
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",
 		"java": ">=25",
 		"fabric-api": "*"
+	},
+	"suggests": {
+		"voicechat": "*"
 	}
 }

@@ -200,6 +200,14 @@ public class GhostsMod implements ModInitializer {
 		int lastPose = -1;
 		boolean dead;
 		boolean seen;
+		Runnable voiceStop;
+
+		void silence() {
+			if (voiceStop != null) {
+				voiceStop.run();
+				voiceStop = null;
+			}
+		}
 		// knockback offset from the recorded path
 		double ox, oy, oz, vx, vy, vz;
 
@@ -227,6 +235,7 @@ public class GhostsMod implements ModInitializer {
 			if (e != null) seen = true;
 			if (seen && (e == null || !e.isAlive() || (e instanceof LivingEntity le && le.getHealth() <= 0))) {
 				dead = true; // killed by hits (mortal ghost) or by a command
+				silence();
 				return;
 			}
 			if (n == 0 || !(e instanceof LivingEntity g)) {
@@ -236,6 +245,7 @@ public class GhostsMod implements ModInitializer {
 			if (take.deathTick >= 0 && tick >= take.deathTick) {
 				run(server, level, "kill " + ghost);
 				dead = true;
+				silence();
 				return;
 			}
 			// knockback: move along the impulse, fall back to the path
@@ -353,6 +363,7 @@ public class GhostsMod implements ModInitializer {
 			LOGGER.warn("Ghost for take {} did not spawn. Command NBT: {}", t.name, nbt);
 		}
 		Playback p = new Playback(t, id, level);
+		p.voiceStop = Voice.play(t.voice, level.getEntity(id), level);
 		PLAYBACKS.add(p);
 		return p;
 	}
@@ -362,8 +373,10 @@ public class GhostsMod implements ModInitializer {
 		recording = null;
 		if (r == null) return null;
 		Take t = r.take;
+		t.voice = Voice.stopCapture();
 		try {
 			t.save(takeFile(server, t.name), server.registryAccess());
+			Voice.save(voiceFile(server, t.name), t.voice);
 			CACHE.put(t.name, t);
 		} catch (IOException ex) {
 			LOGGER.error("Could not save take {}", t.name, ex);
@@ -377,6 +390,7 @@ public class GhostsMod implements ModInitializer {
 
 	static void removeGhosts(MinecraftServer server) {
 		for (Playback p : PLAYBACKS) {
+			p.silence();
 			Entity e = p.level.getEntity(p.ghost);
 			if (e != null) {
 				e.discard();
@@ -403,6 +417,10 @@ public class GhostsMod implements ModInitializer {
 		return takesDir(server).resolve(name + ".json.gz");
 	}
 
+	static Path voiceFile(MinecraftServer server, String name) {
+		return takesDir(server).resolve(name + ".voice");
+	}
+
 	static Take getTake(MinecraftServer server, String name) {
 		Take t = CACHE.get(name);
 		if (t != null) return t;
@@ -410,6 +428,7 @@ public class GhostsMod implements ModInitializer {
 		if (!Files.exists(file)) return null;
 		try {
 			t = Take.load(file, server.registryAccess());
+			t.voice = Voice.load(voiceFile(server, name));
 			CACHE.put(name, t);
 			return t;
 		} catch (IOException | RuntimeException ex) {
@@ -489,6 +508,21 @@ public class GhostsMod implements ModInitializer {
 			.then(Commands.literal("nodeath")
 				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
 					.executes(GhostsMod::noDeath)))
+			.then(Commands.literal("mute")
+				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
+					.executes(ctx -> {
+						MinecraftServer server = ctx.getSource().getServer();
+						Take t = getTake(server, StringArgumentType.getString(ctx, "take"));
+						if (t == null) return fail(ctx, "No take with that name.");
+						t.voice = List.of();
+						try {
+							Files.deleteIfExists(voiceFile(server, t.name));
+						} catch (IOException ex) {
+							return fail(ctx, "Could not delete the voice: " + ex.getMessage());
+						}
+						ok(ctx, "Removed the voice from " + t.name + ".");
+						return 1;
+					})))
 			.then(Commands.literal("name")
 				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
 					.then(Commands.literal("none").executes(ctx -> name(ctx, "")))
@@ -556,8 +590,10 @@ public class GhostsMod implements ModInitializer {
 		begin(player, () -> {
 			for (Take t : partners) spawn(server, level, t);
 			recording = new Recording(id, take);
+			Voice.startCapture(id);
 		});
 		ok(ctx, "Recording " + name + (partners.isEmpty() ? "" : " with " + partners.size() + " ghost(s)")
+			+ (Voice.available() ? " with voice (talk through voice chat)" : "")
 			+ ". /ghost stop when the take is done.");
 		return 1;
 	}
@@ -614,6 +650,7 @@ public class GhostsMod implements ModInitializer {
 			sb.append("\n  ").append(n);
 			if (t != null) {
 				sb.append("  ").append(t.seconds());
+				if (!t.voice.isEmpty()) sb.append("  voice");
 				sb.append("  skin: ").append(t.skinTexture != null ? t.skinTexture : t.skinName);
 				if (t.displayName != null && !t.displayName.isEmpty()) sb.append("  name: ").append(t.displayName);
 			}
@@ -628,6 +665,7 @@ public class GhostsMod implements ModInitializer {
 		if (!validName(name)) return fail(ctx, "Bad take name.");
 		CACHE.remove(name);
 		try {
+			Files.deleteIfExists(voiceFile(server, name));
 			if (!Files.deleteIfExists(takeFile(server, name))) return fail(ctx, "No take called " + name + ".");
 		} catch (IOException ex) {
 			return fail(ctx, "Could not delete: " + ex.getMessage());

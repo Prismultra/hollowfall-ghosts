@@ -67,6 +67,18 @@ Takes are saved in the world folder under `hollowfall_ghosts/`, so they travel w
   ghost dies at that exact moment. Use `/ghost nodeath <take>` to undo that.
 - `/ghost kill <take>` kills a playing ghost whenever you want.
 
+## Ghost voices (optional, needs Simple Voice Chat)
+
+Install **Simple Voice Chat** (26.3) and ghosts can talk.
+- While you record a take, whatever you say through voice chat is saved with it as `<take>.voice`.
+- When the ghost plays back, it says those lines from where it's standing, as proximity voice with the
+  original timing.
+- **Flashback records voice chat**, so the ghost's voice ends up in your replay. Turn on the Simple Voice
+  Chat option in Flashback's settings first.
+- Wear headphones while recording against a talking ghost, or your mic picks up its voice.
+- `/ghost mute <take>` removes a take's voice. Takes with a voice show `voice` in `/ghost list`.
+- Don't pause the game mid-take. The movement pauses, but the voice keeps going and drifts out of sync.
+
 ## The hunter (tobinbeans)
 
 For chase scenes, `/hunter spawn <player>` spawns an AI stalker at your position that hunts that player.

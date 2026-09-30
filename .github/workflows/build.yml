@@ -24,6 +24,22 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew build --stacktrace 2>&1 | tee /tmp/build.log
+      - name: api dump (helps fix compile errors without local Minecraft)
+        if: always()
+        run: |
+          : > /tmp/api.txt
+          JAR=""
+          for j in $(find ~/.gradle/caches .gradle -name '*.jar' 2>/dev/null | grep -i minecraft | grep -v sources); do
+            if unzip -l "$j" 2>/dev/null | grep -q 'net/minecraft/world/entity/LivingEntity.class'; then JAR="$j"; break; fi
+          done
+          echo "jar: $JAR" >> /tmp/api.txt
+          if [ -n "$JAR" ]; then
+            unzip -l "$JAR" | grep -iE 'Swing|Mannequin' >> /tmp/api.txt || true
+            for c in $(cat .github/api-classes.txt); do
+              echo "===== $c" >> /tmp/api.txt
+              javap -p -cp "$JAR" "$c" >> /tmp/api.txt 2>&1 || true
+            done
+          fi
       - name: publish log
         if: always()
         run: |
@@ -37,7 +53,8 @@ jobs:
           cp /tmp/build.log build.log || echo "no log" > build.log
           grep -nE "error:|warning:|FAILURE|BUILD SUCCESSFUL|BUILD FAILED|What went wrong" build.log > summary.txt || true
           printf 'commit %s\nstatus %s\n' "$SHA" "$STATUS" > status.txt
-          git add build.log summary.txt status.txt
+          cp /tmp/api.txt api.txt || true
+          git add build.log summary.txt status.txt api.txt || git add build.log summary.txt status.txt
           git commit -qm "build log for $SHA ($STATUS)"
           git push -qf origin ci-log
       - name: release

@@ -67,6 +67,32 @@ Takes are saved in the world folder under `hollowfall_ghosts/`, so they travel w
   ghost dies at that exact moment. Use `/ghost nodeath <take>` to undo that.
 - `/ghost kill <take>` kills a playing ghost whenever you want.
 
+## The hunter (tobinbeans)
+
+For chase scenes, `/hunter spawn <player>` spawns an AI stalker at your position that hunts that player.
+It wears the tobinbeans skin from the skin pack.
+- It uses vanilla mob pathfinding: it climbs, jumps, swims and opens doors.
+- It always knows where its target is, even without line of sight.
+- It stays invisible until it's close (12 blocks by default), then appears.
+- If it gets stuck, it blinks to where the target was about 5 seconds ago, as if it followed your footsteps.
+- Hit it and it takes real damage; it dies with a normal death animation.
+- **The target must be in Survival or Adventure mode.** Mobs ignore Creative players.
+
+| Command | What it does |
+| --- | --- |
+| `/hunter spawn <player>` | Spawn the hunter here, hunting that player |
+| `/hunter target <player>` | Switch who it hunts |
+| `/hunter pause` / `resume` | Freeze it in place (for dialogue or a camera setup) and unfreeze it |
+| `/hunter stop` | Remove it |
+| `/hunter speed <0.05-1>` | Movement speed (default 0.34, faster than a walking player) |
+| `/hunter damage <n>` | Damage per hit (default 3) |
+| `/hunter health <n>` | Health for the next spawn (default 20) |
+| `/hunter reveal <blocks>` | Invisible beyond this distance; 0 = always visible |
+| `/hunter blink <true/false>` | Whether it blinks along your trail when stuck |
+| `/hunter skin <id>` / `name set <text>` / `name none` / `weapon <item>` | Look for the next spawn |
+
+Use the hunter for real chases and ghosts for scripted moments, like the exact hit that almost kills you.
+
 ## What gets recorded
 
 Recorded:

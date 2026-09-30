@@ -66,15 +66,22 @@ public class GhostsMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			register(dispatcher);
+			Hunter.register(dispatcher);
+		});
 		ServerTickEvents.END_SERVER_TICK.register(GhostsMod::tick);
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
 			CACHE.clear();
 			PLAYBACKS.clear();
 			recording = null;
 			pending = null;
+			Hunter.clear();
 		});
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> stopAll(server));
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			stopAll(server);
+			Hunter.remove(server);
+		});
 		// Attacks always swing the arm; count them in case the swing itself was missed.
 		// Hitting a ghost knocks it off its recorded path for a moment.
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -87,8 +94,10 @@ public class GhostsMod implements ModInitializer {
 					p.knock(entity.getX() - player.getX(), entity.getZ() - player.getZ());
 				}
 			}
+			Hunter.onAttack(player, entity);
 			return InteractionResult.PASS;
 		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> Hunter.onBrainDamaged(entity));
 		// Dying while recording ends the take; the ghost will die on that same tick.
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (recording != null && entity instanceof ServerPlayer sp && sp.getUUID().equals(recording.player)) {
@@ -105,6 +114,7 @@ public class GhostsMod implements ModInitializer {
 	// ============================================================================================
 
 	static void tick(MinecraftServer server) {
+		Hunter.tick(server);
 		if (pending != null) {
 			if (countdownTicks > 0 && countdownTicks % 20 == 0) {
 				actionbar(server, countdownViewer, "Starting in " + (countdownTicks / 20) + "...", "gold");
@@ -502,8 +512,10 @@ public class GhostsMod implements ModInitializer {
 			.then(Commands.literal("clear").executes(ctx -> {
 				MinecraftServer server = ctx.getSource().getServer();
 				stopAll(server);
+				Hunter.remove(server);
 				for (ServerLevel level : server.getAllLevels()) {
 					run(server, level, "kill @e[type=minecraft:mannequin,tag=" + GHOST_TAG + "]");
+					run(server, level, "kill @e[tag=" + Hunter.TAG + "]");
 				}
 				ok(ctx, "Stopped everything and removed all ghosts.");
 				return 1;

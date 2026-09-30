@@ -24,6 +24,18 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew build --stacktrace 2>&1 | tee /tmp/build.log
+      - name: release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          {
+            ls -la build/libs
+            JAR=$(ls build/libs/*.jar | grep -v sources | head -1)
+            gh release delete latest -y --cleanup-tag || true
+            gh release create latest "$JAR" --repo "$GITHUB_REPOSITORY" --title "Latest build" --notes "Built from ${GITHUB_SHA}. Drop this jar into your 26.3 Fabric mods folder."
+          } 2>&1 | tee /tmp/release.log
       - name: api dump (helps fix compile errors without local Minecraft)
         if: always()
         run: |
@@ -54,14 +66,7 @@ jobs:
           grep -nE "error:|warning:|FAILURE|BUILD SUCCESSFUL|BUILD FAILED|What went wrong" build.log > summary.txt || true
           printf 'commit %s\nstatus %s\n' "$SHA" "$STATUS" > status.txt
           cp /tmp/api.txt api.txt || true
-          git add build.log summary.txt status.txt api.txt || git add build.log summary.txt status.txt
+          cp /tmp/release.log release.log || echo 'release step did not run' > release.log
+          git add build.log summary.txt status.txt api.txt release.log || git add build.log summary.txt status.txt
           git commit -qm "build log for $SHA ($STATUS)"
           git push -qf origin ci-log
-      - name: release
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          JAR=$(ls build/libs/*.jar | grep -v sources | head -1)
-          gh release delete latest -y --cleanup-tag || true
-          gh release create latest "$JAR" --title "Latest build" --notes "Built from ${GITHUB_SHA}. Drop this jar into your 26.3 Fabric mods folder."

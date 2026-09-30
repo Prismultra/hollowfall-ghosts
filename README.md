@@ -49,11 +49,23 @@ To just watch takes back: `/ghost play mossie_fight daman_fight`.
 | `/ghost skin <take> player <name>` | Skin of a real account |
 | `/ghost skin <take> slim <true/false>` | Arm model for texture skins |
 | `/ghost name <take> set <text>` / `none` | Name tag above the ghost |
+| `/ghost mortal <take> <true/false>` | Mortal ghosts have normal health: your hits hurt them and they can die |
+| `/ghost kill <take>` | Kill a playing ghost on cue (death animation) |
+| `/ghost nodeath <take>` | Remove the recorded death from a take |
 | `/ghost hits <true/false>` | Whether replayed swings hit live players |
 | `/ghost countdown <0-10>` | Countdown length in seconds (default 3) |
 | `/ghost clear` | Emergency cleanup: stop everything and remove every ghost |
 
 Takes are saved in the world folder under `hollowfall_ghosts/`, so they travel with the world.
+
+## Hitting and killing ghosts
+
+- Hitting a ghost always makes it flinch and knocks it back off its path for a moment. By default it can't be
+  hurt, so a fight can't end early by accident.
+- `/ghost mortal <take> true` gives that ghost normal health, so enough hits kill it.
+- **Scripted deaths:** if you die while recording a take, the take ends there. Every time it plays back, the
+  ghost dies at that exact moment. Use `/ghost nodeath <take>` to undo that.
+- `/ghost kill <take>` kills a playing ghost whenever you want.
 
 ## What gets recorded
 

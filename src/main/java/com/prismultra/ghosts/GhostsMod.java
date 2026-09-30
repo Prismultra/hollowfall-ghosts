@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -75,11 +76,26 @@ public class GhostsMod implements ModInitializer {
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> stopAll(server));
 		// Attacks always swing the arm; count them in case the swing itself was missed.
+		// Hitting a ghost knocks it off its recorded path for a moment.
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!(player instanceof ServerPlayer)) return InteractionResult.PASS; // client-side copy of the event
 			if (recording != null && player.getUUID().equals(recording.player)) {
 				recording.attackThisTick = true;
 			}
+			for (Playback p : PLAYBACKS) {
+				if (p.ghost.equals(entity.getUUID())) {
+					p.knock(entity.getX() - player.getX(), entity.getZ() - player.getZ());
+				}
+			}
 			return InteractionResult.PASS;
+		});
+		// Dying while recording ends the take; the ghost will die on that same tick.
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (recording != null && entity instanceof ServerPlayer sp && sp.getUUID().equals(recording.player)) {
+				recording.take.deathTick = recording.take.frames.size();
+				MinecraftServer server = sp.level().getServer();
+				if (server != null) finishRecording(server);
+			}
 		});
 		LOGGER.info("Hollowfall Ghosts ready: /ghost");
 	}
@@ -172,6 +188,10 @@ public class GhostsMod implements ModInitializer {
 		final ServerLevel level;
 		int tick;
 		int lastPose = -1;
+		boolean dead;
+		boolean seen;
+		// knockback offset from the recorded path
+		double ox, oy, oz, vx, vy, vz;
 
 		Playback(Take take, UUID ghost, ServerLevel level) {
 			this.take = take;
@@ -179,21 +199,47 @@ public class GhostsMod implements ModInitializer {
 			this.level = level;
 		}
 
+		void knock(double dx, double dz) {
+			double len = Math.sqrt(dx * dx + dz * dz);
+			if (len < 1.0e-4) return;
+			vx += dx / len * 0.45;
+			vz += dz / len * 0.45;
+			if (oy <= 0.001) vy = 0.3;
+		}
+
 		void step(MinecraftServer server) {
 			int n = take.frames.size();
+			if (dead) {
+				tick++;
+				return;
+			}
 			Entity e = level.getEntity(ghost);
+			if (e != null) seen = true;
+			if (seen && (e == null || !e.isAlive() || (e instanceof LivingEntity le && le.getHealth() <= 0))) {
+				dead = true; // killed by hits (mortal ghost) or by a command
+				return;
+			}
 			if (n == 0 || !(e instanceof LivingEntity g)) {
 				tick++;
 				return;
 			}
+			if (take.deathTick >= 0 && tick >= take.deathTick) {
+				run(server, level, "kill " + ghost);
+				dead = true;
+				return;
+			}
+			// knockback: move along the impulse, fall back to the path
+			ox += vx; oz += vz; oy = Math.max(0, oy + vy);
+			vx *= 0.55; vz *= 0.55; vy = oy > 0 ? vy - 0.08 : 0;
+			ox *= 0.9; oz *= 0.9;
 			Take.Frame f = take.frames.get(Math.min(tick, n - 1));
-			g.setPos(f.x(), f.y(), f.z());
+			g.setPos(f.x() + ox, f.y() + oy, f.z() + oz);
 			g.setYRot(f.yaw());
 			g.setXRot(f.pitch());
 			g.setYHeadRot(f.headYaw());
 			g.setYBodyRot(f.bodyYaw());
 			g.setDeltaMovement(Vec3.ZERO);
-			if (g.getHealth() < g.getMaxHealth()) {
+			if (!take.mortal && g.getHealth() < g.getMaxHealth()) {
 				g.setHealth(g.getMaxHealth());
 			}
 
@@ -279,7 +325,7 @@ public class GhostsMod implements ModInitializer {
 		nbt.append("UUID:").append(uuidArray(id));
 		nbt.append(",NoGravity:1b,hide_description:1b");
 		nbt.append(",Tags:[\"").append(GHOST_TAG).append("\"]");
-		nbt.append(",attributes:[{id:\"minecraft:max_health\",base:1024.0d}],Health:1024.0f");
+		if (!t.mortal) nbt.append(",attributes:[{id:\"minecraft:max_health\",base:1024.0d}],Health:1024.0f");
 		if (t.skinTexture != null) {
 			nbt.append(",profile:{texture:").append(q(t.skinTexture));
 			if (t.slim) nbt.append(",model:\"slim\"");
@@ -423,6 +469,16 @@ public class GhostsMod implements ModInitializer {
 					.then(Commands.literal("slim")
 						.then(Commands.argument("slim", BoolArgumentType.bool())
 							.executes(GhostsMod::slim)))))
+			.then(Commands.literal("mortal")
+				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
+					.then(Commands.argument("mortal", BoolArgumentType.bool())
+						.executes(GhostsMod::mortal))))
+			.then(Commands.literal("kill")
+				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
+					.executes(GhostsMod::killGhost)))
+			.then(Commands.literal("nodeath")
+				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
+					.executes(GhostsMod::noDeath)))
 			.then(Commands.literal("name")
 				.then(Commands.argument("take", StringArgumentType.word()).suggests(TAKES)
 					.then(Commands.literal("none").executes(ctx -> name(ctx, "")))
@@ -478,6 +534,7 @@ public class GhostsMod implements ModInitializer {
 			take.skinTexture = old.skinTexture;
 			take.slim = old.slim;
 			take.displayName = old.displayName;
+			take.mortal = old.mortal;
 		} else {
 			take.skinName = player.getScoreboardName();
 			take.displayName = player.getScoreboardName();
@@ -592,6 +649,43 @@ public class GhostsMod implements ModInitializer {
 		t.slim = BoolArgumentType.getBool(ctx, "slim");
 		saveQuietly(server, t);
 		ok(ctx, t.name + " uses the " + (t.slim ? "slim" : "wide") + " arm model (texture skins only).");
+		return 1;
+	}
+
+	static int mortal(CommandContext<CommandSourceStack> ctx) {
+		MinecraftServer server = ctx.getSource().getServer();
+		Take t = getTake(server, StringArgumentType.getString(ctx, "take"));
+		if (t == null) return fail(ctx, "No take with that name.");
+		t.mortal = BoolArgumentType.getBool(ctx, "mortal");
+		saveQuietly(server, t);
+		ok(ctx, t.mortal ? t.name + " is mortal: normal health, hits hurt it and it can die."
+			: t.name + " can't be hurt (it still flinches and gets knocked back).");
+		return 1;
+	}
+
+	static int killGhost(CommandContext<CommandSourceStack> ctx) {
+		MinecraftServer server = ctx.getSource().getServer();
+		String name = StringArgumentType.getString(ctx, "take");
+		int killed = 0;
+		for (Playback p : PLAYBACKS) {
+			if (p.take.name.equals(name) && !p.dead) {
+				run(server, p.level, "kill " + p.ghost);
+				p.dead = true;
+				killed++;
+			}
+		}
+		if (killed == 0) return fail(ctx, "No live ghost playing " + name + ".");
+		ok(ctx, "Killed the " + name + " ghost.");
+		return 1;
+	}
+
+	static int noDeath(CommandContext<CommandSourceStack> ctx) {
+		MinecraftServer server = ctx.getSource().getServer();
+		Take t = getTake(server, StringArgumentType.getString(ctx, "take"));
+		if (t == null) return fail(ctx, "No take with that name.");
+		t.deathTick = -1;
+		saveQuietly(server, t);
+		ok(ctx, t.name + " no longer dies at the end.");
 		return 1;
 	}
 

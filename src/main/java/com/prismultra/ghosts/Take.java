@@ -47,6 +47,10 @@ public final class Take {
 	public boolean slim;
 	/** Name tag shown above the ghost. Empty = no name tag. */
 	public String displayName;
+	/** Tick at which the recorded player died, or -1. The ghost dies on that tick. */
+	public int deathTick = -1;
+	/** Mortal ghosts have normal health and can be killed by hits. */
+	public boolean mortal;
 	public final List<Frame> frames = new ArrayList<>();
 	/** tick -> full equipment snapshot (only stored on the ticks it changed). */
 	public final TreeMap<Integer, ItemStack[]> equipment = new TreeMap<>();
@@ -76,6 +80,8 @@ public final class Take {
 		if (skinTexture != null) root.addProperty("skinTexture", skinTexture);
 		root.addProperty("slim", slim);
 		if (displayName != null) root.addProperty("displayName", displayName);
+		root.addProperty("deathTick", deathTick);
+		root.addProperty("mortal", mortal);
 
 		JsonArray fr = new JsonArray();
 		for (Frame f : frames) {
@@ -125,6 +131,8 @@ public final class Take {
 		if (root.has("skinTexture")) t.skinTexture = root.get("skinTexture").getAsString();
 		if (root.has("slim")) t.slim = root.get("slim").getAsBoolean();
 		if (root.has("displayName")) t.displayName = root.get("displayName").getAsString();
+		if (root.has("deathTick")) t.deathTick = root.get("deathTick").getAsInt();
+		if (root.has("mortal")) t.mortal = root.get("mortal").getAsBoolean();
 
 		for (JsonElement el : root.getAsJsonArray("frames")) {
 			JsonArray a = el.getAsJsonArray();

@@ -1,4 +1,2 @@
-net.minecraft.core.ClientAsset
 net.minecraft.core.ClientAsset$ResourceTexture
-net.minecraft.world.item.component.ResolvableProfile
-net.minecraft.world.entity.player.PlayerSkin
+net.minecraft.world.entity.player.PlayerSkin$Patch

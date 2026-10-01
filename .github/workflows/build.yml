@@ -49,7 +49,7 @@ jobs:
             unzip -l "$JAR" | grep -iE 'ClientAsset|ResolvableProfile|PlayerSkin|SkinManager|MannequinRenderer|AvatarRenderer|PlayerModelType' >> /tmp/api.txt || true
             for c in $(cat .github/api-classes.txt); do
               echo "===== $c" >> /tmp/api.txt
-              javap -c -p -cp "$JAR" "$c" | grep -E "class |ldc|public|static" >> /tmp/api.txt 2>&1 || true
+              javap -c -p -constants -cp "$JAR" "$c" | grep -vE "^\s+[0-9]+: (aload|astore|iload|istore|dup|pop|areturn|return|ireturn|checkcast|new )" >> /tmp/api.txt 2>&1 || true
             done
           fi
       - name: publish log

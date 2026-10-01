@@ -46,10 +46,10 @@ jobs:
           done
           echo "jar: $JAR" >> /tmp/api.txt
           if [ -n "$JAR" ]; then
-            unzip -l "$JAR" | grep -iE 'Swing|Mannequin' >> /tmp/api.txt || true
+            unzip -l "$JAR" | grep -iE 'ClientAsset|ResolvableProfile|PlayerSkin|SkinManager|MannequinRenderer|AvatarRenderer|PlayerModelType' >> /tmp/api.txt || true
             for c in $(cat .github/api-classes.txt); do
               echo "===== $c" >> /tmp/api.txt
-              javap -p -cp "$JAR" "$c" >> /tmp/api.txt 2>&1 || true
+              javap -c -p -cp "$JAR" "$c" | grep -E "class |ldc|public|static" >> /tmp/api.txt 2>&1 || true
             done
           fi
       - name: publish log

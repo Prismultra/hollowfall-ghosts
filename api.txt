@@ -1,0 +1,76 @@
+jar: /home/runner/.gradle/caches/fabric-loom/26.3/minecraft-merged.jar
+     5484  1980-02-01 00:00   net/minecraft/client/gui/components/PlayerSkinWidget.class
+     5020  1980-02-01 00:00   net/minecraft/client/renderer/PlayerSkinRenderCache$1.class
+     2361  1980-02-01 00:00   net/minecraft/client/renderer/PlayerSkinRenderCache$2.class
+     3952  1980-02-01 00:00   net/minecraft/client/renderer/PlayerSkinRenderCache$RenderInfo.class
+     6742  1980-02-01 00:00   net/minecraft/client/renderer/PlayerSkinRenderCache.class
+    23927  1980-02-01 00:00   net/minecraft/client/renderer/entity/player/AvatarRenderer.class
+     3359  1980-02-01 00:00   net/minecraft/client/resources/DefaultPlayerSkin.class
+     6370  1980-02-01 00:00   net/minecraft/client/resources/SkinManager$1.class
+     2148  1980-02-01 00:00   net/minecraft/client/resources/SkinManager$CacheKey.class
+     4908  1980-02-01 00:00   net/minecraft/client/resources/SkinManager$TextureCache.class
+    10924  1980-02-01 00:00   net/minecraft/client/resources/SkinManager.class
+     1073  1980-02-01 00:00   net/minecraft/client/resources/SkinManager$2.class
+     1960  1980-02-01 00:00   net/minecraft/core/ClientAsset$DownloadedTexture.class
+     4355  1980-02-01 00:00   net/minecraft/core/ClientAsset$ResourceTexture.class
+      291  1980-02-01 00:00   net/minecraft/core/ClientAsset$Texture.class
+      449  1980-02-01 00:00   net/minecraft/core/ClientAsset.class
+     4501  1980-02-01 00:00   net/minecraft/world/entity/player/PlayerModelType.class
+     7442  1980-02-01 00:00   net/minecraft/world/entity/player/PlayerSkin$Patch.class
+     3800  1980-02-01 00:00   net/minecraft/world/entity/player/PlayerSkin.class
+     6088  1980-02-01 00:00   net/minecraft/world/item/component/ResolvableProfile$Dynamic.class
+     6793  1980-02-01 00:00   net/minecraft/world/item/component/ResolvableProfile$Partial.class
+     5645  1980-02-01 00:00   net/minecraft/world/item/component/ResolvableProfile$Static.class
+    10653  1980-02-01 00:00   net/minecraft/world/item/component/ResolvableProfile.class
+===== net.minecraft.core.ClientAsset$ResourceTexture
+   #29 = InvokeDynamic      #1:#30        // #1:toString:(Lnet/minecraft/core/ClientAsset$ResourceTexture;)Ljava/lang/String;
+   #30 = NameAndType        #31:#32       // toString:(Lnet/minecraft/core/ClientAsset$ResourceTexture;)Ljava/lang/String;
+   #31 = Utf8               toString
+   #32 = Utf8               (Lnet/minecraft/core/ClientAsset$ResourceTexture;)Ljava/lang/String;
+   #41 = InvokeDynamic      #2:#42        // #2:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+   #42 = NameAndType        #43:#44       // makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+   #44 = Utf8               (Ljava/lang/String;)Ljava/lang/String;
+   #60 = String             #61           // asset_id
+   #62 = InterfaceMethodref #54.#63       // com/mojang/serialization/Codec.fieldOf:(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;
+   #63 = NameAndType        #64:#65       // fieldOf:(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;
+   #65 = Utf8               (Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;
+   #95 = Utf8               ()Ljava/lang/String;
+  #103 = Utf8               Ljava/lang/String;
+  #114 = MethodHandle       6:#115        // REF_invokeStatic net/minecraft/core/ClientAsset$ResourceTexture.lambda$new$0:(Ljava/lang/String;)Ljava/lang/String;
+  #115 = Methodref          #8.#116       // net/minecraft/core/ClientAsset$ResourceTexture.lambda$new$0:(Ljava/lang/String;)Ljava/lang/String;
+  #116 = NameAndType        #101:#44      // lambda$new$0:(Ljava/lang/String;)Ljava/lang/String;
+  #117 = MethodType         #44           //  (Ljava/lang/String;)Ljava/lang/String;
+  #118 = String             #119          // id;texturePath
+  #122 = String             #123          // textures/\u0001.png
+  #123 = Utf8               textures/\u0001.png
+  #134 = MethodHandle       6:#135        // REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+  #135 = Methodref          #136.#137     // java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+  #137 = NameAndType        #139:#140     // metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+  #140 = Utf8               (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+  #141 = MethodHandle       6:#142        // REF_invokeStatic java/lang/runtime/ObjectMethods.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+  #142 = Methodref          #143.#144     // java/lang/runtime/ObjectMethods.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+  #144 = NameAndType        #146:#147     // bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+  #147 = Utf8               (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+  #148 = MethodHandle       6:#149        // REF_invokeStatic java/lang/invoke/StringConcatFactory.makeConcatWithConstants:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+  #149 = Methodref          #150.#151     // java/lang/invoke/StringConcatFactory.makeConcatWithConstants:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+  #150 = Class              #152          // java/lang/invoke/StringConcatFactory
+  #151 = NameAndType        #43:#153      // makeConcatWithConstants:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+  #152 = Utf8               java/lang/invoke/StringConcatFactory
+  #153 = Utf8               (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+  public final java.lang.String toString();
+    descriptor: ()Ljava/lang/String;
+         1: invokedynamic #29,  0             // InvokeDynamic #1:toString:(Lnet/minecraft/core/ClientAsset$ResourceTexture;)Ljava/lang/String;
+  private static java.lang.String lambda$new$0(java.lang.String);
+    descriptor: (Ljava/lang/String;)Ljava/lang/String;
+         1: invokedynamic #41,  0             // InvokeDynamic #2:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+            0       7     0  path   Ljava/lang/String;
+        24: ldc           #60                 // String asset_id
+        26: invokeinterface #62,  2           // InterfaceMethod com/mojang/serialization/Codec.fieldOf:(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;
+  0: #134 REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+      #114 REF_invokeStatic net/minecraft/core/ClientAsset$ResourceTexture.lambda$new$0:(Ljava/lang/String;)Ljava/lang/String;
+      #117 (Ljava/lang/String;)Ljava/lang/String;
+  1: #141 REF_invokeStatic java/lang/runtime/ObjectMethods.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+  2: #148 REF_invokeStatic java/lang/invoke/StringConcatFactory.makeConcatWithConstants:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+      #122 textures/\u0001.png
+  3: #134 REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+  4: #134 REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;

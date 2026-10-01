@@ -1,2 +1,1 @@
 net.minecraft.core.ClientAsset$ResourceTexture
-net.minecraft.world.entity.player.PlayerSkin$Patch
